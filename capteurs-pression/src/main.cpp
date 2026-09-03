@@ -58,29 +58,37 @@ void setup() {
 }
 
 void loop() {
-  // Lecture brute (16 bits) des deux entrees de l'ADS1115 :
-  // A0 = capteur AVANT le filtre, A1 = capteur APRES le filtre
-  int16_t raw_avant = ads.readADC_SingleEnded(0);
-  int16_t raw_apres = ads.readADC_SingleEnded(1);
+  // Lecture brute (16 bits) des trois entrees de l'ADS1115 :
+  // A0 = avant le filtre 1, A1 = entre le filtre 1 et le filtre 2, A2 = apres le filtre 2
+  int16_t raw_p1 = ads.readADC_SingleEnded(0);
+  int16_t raw_p2 = ads.readADC_SingleEnded(1);
+  int16_t raw_p3 = ads.readADC_SingleEnded(2);
 
   // Conversion de la valeur brute en tension reelle (volts)
-  float v_avant = ads.computeVolts(raw_avant);
-  float v_apres = ads.computeVolts(raw_apres);
+  float v_p1 = ads.computeVolts(raw_p1);
+  float v_p2 = ads.computeVolts(raw_p2);
+  float v_p3 = ads.computeVolts(raw_p3);
 
   // Conversion de chaque tension en pression (bar)
-  float p_avant = voltageToPressure(v_avant);
-  float p_apres = voltageToPressure(v_apres);
+  float p1 = voltageToPressure(v_p1);
+  float p2 = voltageToPressure(v_p2);
+  float p3 = voltageToPressure(v_p3);
 
-  // Delta de pression entre avant et apres le filtre : plus il est grand,
-  // plus le filtre est encrasse (perte de charge elevee)
-  float delta_p = p_avant - p_apres;
+  // Delta de pression sur chaque filtre : plus il est grand,
+  // plus le filtre correspondant est encrasse (perte de charge elevee)
+  float delta_filtre1 = p1 - p2;
+  float delta_filtre2 = p2 - p3;
 
-  Serial.print("P avant: ");
-  Serial.print(p_avant, 3);
-  Serial.print(" bar | P apres: ");
-  Serial.print(p_apres, 3);
-  Serial.print(" bar | Delta P (encrassement): ");
-  Serial.print(delta_p, 3);
+  Serial.print("P1 (avant filtre 1): ");
+  Serial.print(p1, 3);
+  Serial.print(" bar | P2 (entre filtres): ");
+  Serial.print(p2, 3);
+  Serial.print(" bar | P3 (apres filtre 2): ");
+  Serial.print(p3, 3);
+  Serial.print(" bar | Delta filtre 1: ");
+  Serial.print(delta_filtre1, 3);
+  Serial.print(" bar | Delta filtre 2: ");
+  Serial.print(delta_filtre2, 3);
   Serial.println(" bar");
 
   // Une mesure par seconde
